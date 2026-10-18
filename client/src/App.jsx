@@ -74,6 +74,7 @@ function CheckIn({ pin }) {
       <Field label="Name"><input value={f.name} onChange={set('name')} autoFocus /></Field>
       <Field label="Or what they go by" hint="A nickname or first name only is fine"><input value={f.alias} onChange={set('alias')} /></Field>
       <Field label="Age group"><AgeSelect value={f.ageRange} onChange={set('ageRange')} /></Field>
+      {!f.ageRange && <p className="hint">If age is unknown, “List me” becomes “Ask me first.”</p>}
       <Field label="Traveling with"><input value={f.travelingWith} onChange={set('travelingWith')} /></Field>
       <Field label="Last place they were"><input value={f.lastSeen} onChange={set('lastSeen')} /></Field>
       <fieldset>

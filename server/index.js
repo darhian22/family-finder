@@ -58,12 +58,19 @@ const findMatches = async (q) =>
 
 // ---- Middleware ----
 const wrap = (fn) => (req, res) => fn(req, res).catch((e) => { console.error(e); res.status(500).json({ error: 'Something went wrong. Try again.' }); });
-const hits = {};
+const publicHits = {};
+const staffHits = {};
 const limit = (req, res, next) => {
   const t = Date.now();
-  hits[req.ip] = (hits[req.ip] || []).filter((x) => t - x < 60000);
-  if (hits[req.ip].length >= 20) return res.status(429).json({ error: 'Too many searches. Wait a minute and try again.' });
-  hits[req.ip].push(t); next();
+  publicHits[req.ip] = (publicHits[req.ip] || []).filter((x) => t - x < 60000);
+  if (publicHits[req.ip].length >= 20) return res.status(429).json({ error: 'Too many searches. Wait a minute and try again.' });
+  publicHits[req.ip].push(t); next();
+};
+const staffLimit = (req, res, next) => {
+  const t = Date.now();
+  staffHits[req.ip] = (staffHits[req.ip] || []).filter((x) => t - x < 60000);
+  if (staffHits[req.ip].length >= 60) return res.status(429).json({ error: 'Too many shelter requests. Wait a minute and try again.' });
+  staffHits[req.ip].push(t); next();
 };
 const staff = (req, res, next) => {
   const s = SHELTERS.find((x) => x.pin === req.get('x-pin'));
@@ -93,19 +100,20 @@ app.post('/api/notes', limit, wrap(async (req, res) => {
 }));
 
 // ---- Staff (shelter PIN) ----
-app.get('/api/staff/me', limit, staff, (req, res) => res.json({ name: req.shelter.name }));
+app.get('/api/staff/me', staffLimit, staff, (req, res) => res.json({ name: req.shelter.name }));
 
-app.post('/api/people', limit, staff, wrap(async (req, res) => {
+app.post('/api/people', staffLimit, staff, wrap(async (req, res) => {
   const b = req.body, t = (v) => String(v || '').trim().slice(0, 200);
   const minor = ['child', 'teen'].includes(b.ageRange);
   const unknownAge = !b.ageRange;
-  const visibility = minor || unknownAge ? 'ask' : ['open', 'ask', 'hidden'].includes(b.visibility) ? b.visibility : 'ask';
+  const visibility = minor ? 'ask' : ['open', 'ask', 'hidden'].includes(b.visibility) ? (unknownAge && b.visibility === 'open' ? 'ask' : b.visibility) : 'ask';
   const p = await store.add('people', { code: req.shelter.id.toUpperCase() + '-' + Math.floor(1000 + Math.random() * 9000), shelter: req.shelter.id, name: t(b.name), alias: t(b.alias), ageRange: b.ageRange || '', travelingWith: t(b.travelingWith), lastSeen: t(b.lastSeen), visibility, createdAt: Date.now() });
   res.json({ code: p.code, visibility });
 }));
 
-app.get('/api/staff/notes', limit, staff, wrap(async (req, res) => {
+app.get('/api/staff/notes', staffLimit, staff, wrap(async (req, res) => {
   const notes = (await store.list('notes')).filter((n) => !Array.isArray(n.doneBy) || !n.doneBy.includes(req.shelter.id));
+  const people = await store.list('people');
   const out = [];
   for (const n of notes) {
     const q = { name: n.query?.name || '', code: n.query?.code || '', ageRange: n.ageRange || n.query?.ageRange || '' };
@@ -123,7 +131,7 @@ app.get('/api/staff/notes', limit, staff, wrap(async (req, res) => {
   res.json({ notes: out });
 }));
 
-app.post('/api/staff/notes/:id/resolve', limit, staff, wrap(async (req, res) => {
+app.post('/api/staff/notes/:id/resolve', staffLimit, staff, wrap(async (req, res) => {
   const notes = await store.list('notes');
   const note = notes.find((n) => n.id === req.params.id);
   if (!note) return res.status(404).json({ error: 'That note was not found.' });

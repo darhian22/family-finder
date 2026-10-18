@@ -3,7 +3,6 @@
 A privacy-first shelter check-in and family search app for disaster evacuations. It is designed for a volunteer with about 30 seconds per person, a searcher with no phone, and a registrant who may be afraid to give a full name.
 
 **Live app:** https://family-finder.onrender.com/
-**Screenshots:** placeholder screenshots should be added to the repo or replaced with a few exported app captures
 
 ## Overview
 This app focuses on the part that matters most in the first 24-72 hours after a disaster: getting people safely checked in at shelters and letting families search without exposing those who do not want to be found.
@@ -47,11 +46,13 @@ Where this piece fits in the broader system: the app is the operational layer th
 - Minors are treated as staff-mediated by default, which is safer in the disaster context
 
 ### Edge cases handled
+- Duplicate detection across shelters is not implemented in this version. Staff still review likely matches in the shelter inbox, and records are never overwritten automatically.
 - Stale records: shelter staff can refresh and review notes, and records are not treated as final without staff mediation
 - Wrong information: the system does not trust name or location as definitive; note-based verification is the path for real confirmation
 - Impersonators: the app supports the model for a future verification question while keeping the current scope realistic
 - Minors: always staff-mediated, never auto-public
 - Missing ID or phone: staff codes and note contact details are enough for the immediate workflow
+- Unknown age: if the volunteer leaves age blank, the record defaults to “Ask me first” rather than “List me.”
 
 ## Technical choices
 This app uses a single Express server that serves the built React frontend and also exposes the API. That gives one URL, no CORS issues, and one deployable service.
@@ -103,7 +104,7 @@ This is the deployment pattern intended for the final challenge submission:
 The live app is currently deployed at https://family-finder.onrender.com/.
 
 ## AI process notes
-I used AI to help structure the problem, keep the scope realistic, and speed up the initial implementation, then I tightened the app around the actual shelter workflow and privacy rules.
+AI helped with the first pass on problem framing, the initial API shape, and the naming of the core shelter workflow. I used it to tighten the scope and move quickly, then I verified the privacy rules, the matching logic, and the staff flow against the actual disaster-response requirements.
 
 What I kept:
 - the 30-second volunteer workflow
@@ -112,8 +113,9 @@ What I kept:
 - realistic fuzzy matching on a limited dataset
 
 What I changed or rejected:
-- I removed the claim that duplicate detection existed before it was implemented
+- I removed the duplicate-detection claim because it was not implemented in the code
 - I kept the app focused on the intake/search/inbox loop instead of trying to build a full regional matching system
 - I kept the staff PIN model because it matches the stretched-volunteer scenario better than full account management
+- I verified the public/private behavior and the age-visibility rule before shipping the final version
 
 This kept the app realistic for the challenge without pretending it can solve a 400,000-person emergency response ecosystem in one night.
