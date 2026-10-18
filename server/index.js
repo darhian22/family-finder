@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const app = express();
+app.set('trust proxy', 1);
 app.use(express.json());
 
 const SHELTERS = [
@@ -49,7 +50,7 @@ function nameScore(q, target) {
 function score(q, p) {
   if (q.code && q.code.trim().toUpperCase() === p.code) return 1;
   let s = Math.max(nameScore(q.name, p.name), nameScore(q.name, p.alias));
-  if (q.ageRange && p.ageRange && q.ageRange !== p.ageRange) s *= 0.7;
+  if (q.ageRange && p.ageRange && q.ageRange !== p.ageRange) s *= 0.85;
   return s;
 }
 const findMatches = async (q) =>
@@ -79,33 +80,55 @@ app.post('/api/search', limit, wrap(async (req, res) => {
 // ---- Public: leave a note. Same reply every time; hidden people are never notified ----
 app.post('/api/notes', limit, wrap(async (req, res) => {
   const { query = {}, contact = '', message = '' } = req.body;
-  const matched = (await findMatches(query)).filter((x) => x.p.visibility !== 'hidden').map(({ p }) => ({ shelter: p.shelter, code: p.code }));
-  await store.add('notes', { query: { name: query.name || '', code: query.code || '' }, contact: String(contact).slice(0, 300), message: String(message).slice(0, 1000), matched, status: 'new', createdAt: Date.now() });
+  await store.add('notes', {
+    query: { name: query.name || '', code: query.code || '', ageRange: query.ageRange || '' },
+    contact: String(contact).slice(0, 300),
+    message: String(message).slice(0, 1000),
+    ageRange: query.ageRange || '',
+    doneBy: [],
+    status: 'new',
+    createdAt: Date.now()
+  });
   res.json({ ok: true });
 }));
 
 // ---- Staff (shelter PIN) ----
-app.get('/api/staff/me', staff, (req, res) => res.json({ name: req.shelter.name }));
+app.get('/api/staff/me', limit, staff, (req, res) => res.json({ name: req.shelter.name }));
 
-app.post('/api/people', staff, wrap(async (req, res) => {
+app.post('/api/people', limit, staff, wrap(async (req, res) => {
   const b = req.body, t = (v) => String(v || '').trim().slice(0, 200);
   const minor = ['child', 'teen'].includes(b.ageRange);
-  const visibility = minor ? 'ask' : ['open', 'ask', 'hidden'].includes(b.visibility) ? b.visibility : 'ask';
+  const unknownAge = !b.ageRange;
+  const visibility = minor || unknownAge ? 'ask' : ['open', 'ask', 'hidden'].includes(b.visibility) ? b.visibility : 'ask';
   const p = await store.add('people', { code: req.shelter.id.toUpperCase() + '-' + Math.floor(1000 + Math.random() * 9000), shelter: req.shelter.id, name: t(b.name), alias: t(b.alias), ageRange: b.ageRange || '', travelingWith: t(b.travelingWith), lastSeen: t(b.lastSeen), visibility, createdAt: Date.now() });
   res.json({ code: p.code, visibility });
 }));
 
-app.get('/api/staff/notes', staff, wrap(async (req, res) => {
-  const people = await store.list('people');
-  const notes = (await store.list('notes')).filter((n) => n.status === 'new' && n.matched.some((m) => m.shelter === req.shelter.id));
-  res.json({ notes: notes.map((n) => ({
-    id: n.id, createdAt: n.createdAt, searchedFor: n.query.name || n.query.code, contact: n.contact, message: n.message,
-    people: n.matched.filter((m) => m.shelter === req.shelter.id).map((m) => people.find((p) => p.code === m.code)).filter(Boolean).map((p) => ({ code: p.code, name: p.name, alias: p.alias, visibility: p.visibility })),
-  })) });
+app.get('/api/staff/notes', limit, staff, wrap(async (req, res) => {
+  const notes = (await store.list('notes')).filter((n) => !Array.isArray(n.doneBy) || !n.doneBy.includes(req.shelter.id));
+  const out = [];
+  for (const n of notes) {
+    const q = { name: n.query?.name || '', code: n.query?.code || '', ageRange: n.ageRange || n.query?.ageRange || '' };
+    const peopleForThisShelter = (await findMatches(q)).filter((x) => x.p.shelter === req.shelter.id && x.p.visibility !== 'hidden').map(({ p }) => ({ code: p.code, name: p.name, alias: p.alias, visibility: p.visibility }));
+    if (!peopleForThisShelter.length) continue;
+    out.push({
+      id: n.id,
+      createdAt: n.createdAt,
+      searchedFor: n.query?.name || n.query?.code || '',
+      contact: n.contact,
+      message: n.message,
+      people: peopleForThisShelter,
+    });
+  }
+  res.json({ notes: out });
 }));
 
-app.post('/api/staff/notes/:id/resolve', staff, wrap(async (req, res) => {
-  await store.update('notes', req.params.id, { status: 'done' });
+app.post('/api/staff/notes/:id/resolve', limit, staff, wrap(async (req, res) => {
+  const notes = await store.list('notes');
+  const note = notes.find((n) => n.id === req.params.id);
+  if (!note) return res.status(404).json({ error: 'That note was not found.' });
+  const doneBy = Array.isArray(note.doneBy) ? [...new Set([...note.doneBy, req.shelter.id])] : [req.shelter.id];
+  await store.update('notes', req.params.id, { doneBy, status: 'done' });
   res.json({ ok: true });
 }));
 

@@ -1,1 +1,1 @@
-{"name":"family-finder","version":"1.0.0","scripts":{"build":"npm install --prefix client && npm run build --prefix client","start":"node server/index.js"},"dependencies":{"express":"^4.19.2","firebase-admin":"^12.3.0"}}
+{"name":"family-finder","version":"1.0.0","scripts":{"build":"npm install --include=dev --prefix client && npm run build --prefix client","start":"node server/index.js"},"dependencies":{"express":"^4.19.2","firebase-admin":"^12.3.0"}}
