@@ -104,17 +104,12 @@ This is the deployment pattern intended for the final challenge submission:
 The live app is currently deployed at https://family-finder.onrender.com/.
 
 ## AI process notes
-AI helped with the first pass on problem framing, the initial API shape, and the naming of the core shelter workflow. I used it to tighten the scope and move quickly, then I checked the privacy rules, staff flow, and visibility logic against the disaster-response requirements.
+**Tools:** ChatGPT drafted the first pass of the Express routes and the initial React screen structure. I used a chat review pass to catch logic issues before submission.
 
-What I kept:
-- the 30-second volunteer workflow
-- privacy-first visibility rules
-- staff-mediated note flow
-- realistic fuzzy matching on a limited dataset
+**What I decided vs. what AI drafted:** I chose the PIN-only staff access model, the three visibility levels, and the rule that minors are always staff-mediated. AI drafted the initial route structure and the first UI pass; I refined the privacy model and tightened the matching logic.
 
-What I changed or rejected:
-- I kept the app focused on the intake/search/inbox loop instead of trying to build a full regional matching system
-- I kept the staff PIN model because it matches the stretched-volunteer scenario better than full account management
-- I tested the open, ask, and hidden visibility behavior through the API and confirmed the public-private rules before shipping
+**What review caught:** The review identified that (1) notes only matched people registered before the note was written, (2) “mark done” hid a note from every shelter, (3) unknown age silently overrode “Keep me private,” (4) the rate limiter treated all users behind Render’s proxy as one IP, (5) the Render build could skip Vite in production installs, and (6) the README had claimed duplicate detection the code did not implement. I fixed each issue in the code and README.
+
+**Where I chose differently:** I kept the PIN auth model instead of adding full staff accounts, because the challenge is about a fast shelter workflow under stress rather than a complete identity system.
 
 This kept the app realistic for the challenge without pretending it can solve a 400,000-person emergency response ecosystem in one night.
