@@ -53,8 +53,8 @@ function score(q, p) {
   if (q.ageRange && p.ageRange && q.ageRange !== p.ageRange) s *= 0.85;
   return s;
 }
-const findMatches = async (q) =>
-  (await store.list('people')).map((p) => ({ p, s: score(q || {}, p) })).filter((x) => x.s >= 0.72).sort((a, b) => b.s - a.s);
+const findMatches = async (q, people = null) =>
+  (people || await store.list('people')).map((p) => ({ p, s: score(q || {}, p) })).filter((x) => x.s >= 0.72).sort((a, b) => b.s - a.s);
 
 // ---- Middleware ----
 const wrap = (fn) => (req, res) => fn(req, res).catch((e) => { console.error(e); res.status(500).json({ error: 'Something went wrong. Try again.' }); });
@@ -117,7 +117,7 @@ app.get('/api/staff/notes', staffLimit, staff, wrap(async (req, res) => {
   const out = [];
   for (const n of notes) {
     const q = { name: n.query?.name || '', code: n.query?.code || '', ageRange: n.ageRange || n.query?.ageRange || '' };
-    const peopleForThisShelter = (await findMatches(q)).filter((x) => x.p.shelter === req.shelter.id && x.p.visibility !== 'hidden').map(({ p }) => ({ code: p.code, name: p.name, alias: p.alias, visibility: p.visibility }));
+    const peopleForThisShelter = (await findMatches(q, people)).filter((x) => x.p.shelter === req.shelter.id && x.p.visibility !== 'hidden').map(({ p }) => ({ code: p.code, name: p.name, alias: p.alias, visibility: p.visibility }));
     if (!peopleForThisShelter.length) continue;
     out.push({
       id: n.id,

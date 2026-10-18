@@ -104,7 +104,7 @@ This is the deployment pattern intended for the final challenge submission:
 The live app is currently deployed at https://family-finder.onrender.com/.
 
 ## AI process notes
-AI helped with the first pass on problem framing, the initial API shape, and the naming of the core shelter workflow. I used it to tighten the scope and move quickly, then I verified the privacy rules, the matching logic, and the staff flow against the actual disaster-response requirements.
+AI helped with the first pass on problem framing, the initial API shape, and the naming of the core shelter workflow. I used it to tighten the scope and move quickly, then I checked the privacy rules, staff flow, and visibility logic against the disaster-response requirements.
 
 What I kept:
 - the 30-second volunteer workflow
@@ -113,9 +113,8 @@ What I kept:
 - realistic fuzzy matching on a limited dataset
 
 What I changed or rejected:
-- I removed the duplicate-detection claim because it was not implemented in the code
 - I kept the app focused on the intake/search/inbox loop instead of trying to build a full regional matching system
 - I kept the staff PIN model because it matches the stretched-volunteer scenario better than full account management
-- I verified the public/private behavior and the age-visibility rule before shipping the final version
+- I tested the open, ask, and hidden visibility behavior through the API and confirmed the public-private rules before shipping
 
 This kept the app realistic for the challenge without pretending it can solve a 400,000-person emergency response ecosystem in one night.
