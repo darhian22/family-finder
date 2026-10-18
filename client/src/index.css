@@ -1,0 +1,19 @@
+:root { --bg:#f2f5f7; --ink:#14232b; --brand:#0f5c6e; --line:#b9c6cd; --warn:#a33d08; font-family:'Atkinson Hyperlegible',system-ui,sans-serif; font-size:19px; color:var(--ink); background:var(--bg); }
+* { box-sizing:border-box; }
+body { margin:0; }
+main { max-width:640px; margin:0 auto; padding:16px; }
+h1 { margin:0 0 12px; font-size:1.6rem; } h2 { margin:20px 0 12px; } h3 { margin:24px 0 4px; }
+.tabs { display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+button, input, select, textarea { font:inherit; color:inherit; }
+button { min-height:52px; padding:0 18px; border:2px solid var(--brand); background:#fff; border-radius:8px; cursor:pointer; }
+button[aria-pressed='true'], button.primary { background:var(--brand); color:#fff; }
+button.primary { width:100%; margin-top:8px; font-weight:700; }
+.field { display:block; margin-bottom:14px; } .field span { display:block; font-weight:700; } small { display:block; color:#46585f; }
+input, select, textarea { width:100%; min-height:52px; padding:10px 12px; border:2px solid var(--line); border-radius:8px; background:#fff; margin-top:4px; }
+:focus-visible { outline:3px solid #e0a100; outline-offset:2px; }
+fieldset { border:2px solid var(--line); border-radius:8px; margin:8px 0; padding:8px 12px; }
+.radio { display:flex; gap:12px; align-items:flex-start; padding:10px 0; } .radio input { width:28px; min-height:28px; margin-top:2px; }
+.card { background:#fff; border:2px solid var(--line); border-radius:8px; padding:14px; margin:10px 0; display:grid; gap:6px; }
+.card button { justify-self:start; }
+.code { font-size:2.4rem; font-weight:700; letter-spacing:.06em; margin:4px 0; }
+.hint { color:#46585f; } .error { color:var(--warn); font-weight:700; } .ok { color:var(--brand); font-weight:700; }
