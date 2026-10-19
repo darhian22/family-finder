@@ -4,6 +4,13 @@ A privacy-first shelter check-in and family search app for disaster evacuations.
 
 **Live app:** https://family-finder.onrender.com/
 
+## Screenshots
+
+![Search with a typo still finds the person](docs/search-result.png)
+![Hidden records look like no match, and searchers can leave a note](docs/no-match.png)
+![Shelter check-in with three visibility choices](docs/checkin.png)
+![Staff inbox showing a note and its possible match](docs/inbox.png)
+
 ## Overview
 This app focuses on the part that matters most in the first 24-72 hours after a disaster: getting people safely checked in at shelters and letting families search without exposing those who do not want to be found.
 
