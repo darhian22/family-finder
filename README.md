@@ -116,7 +116,18 @@ This kept the app realistic for the challenge without pretending it can solve a 
 
 ## Screenshots
 
-![Search with a typo still finds the person](docs/search-result.png)
-![Hidden records look like no match, and searchers can leave a note](docs/no-match.png)
-![Shelter check-in with three visibility choices](docs/checkin.png)
-![Staff inbox showing a note and its possible match](docs/inbox.png)
+![Search result showing a typo still finds the person](docs/search-result.png)
+
+*A misspelled name still returns the likely match.*
+
+![No public match and the option to leave shelter staff a note](docs/no-match.png)
+
+*A protected record appears as no public match, with an option to contact staff.*
+
+![Check-in form with three visibility choices](docs/checkin.png)
+
+*The check-in form lets each person choose how their information can be shared.*
+
+![Shelter staff inbox showing a searcher's note and a possible match](docs/inbox.png)
+
+*Staff can review a note and ask before sharing information about a possible match.*
