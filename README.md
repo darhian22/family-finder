@@ -4,13 +4,6 @@ A privacy-first shelter check-in and family search app for disaster evacuations.
 
 **Live app:** https://family-finder.onrender.com/
 
-## Screenshots
-
-![Search with a typo still finds the person](docs/search-result.png)
-![Hidden records look like no match, and searchers can leave a note](docs/no-match.png)
-![Shelter check-in with three visibility choices](docs/checkin.png)
-![Staff inbox showing a note and its possible match](docs/inbox.png)
-
 ## Overview
 This app focuses on the part that matters most in the first 24-72 hours after a disaster: getting people safely checked in at shelters and letting families search without exposing those who do not want to be found.
 
@@ -120,3 +113,10 @@ The live app is currently deployed at https://family-finder.onrender.com/.
 **Where I chose differently:** I kept the PIN auth model instead of adding full staff accounts, because the challenge is about a fast shelter workflow under stress rather than a complete identity system.
 
 This kept the app realistic for the challenge without pretending it can solve a 400,000-person emergency response ecosystem in one night.
+
+## Screenshots
+
+![Search with a typo still finds the person](docs/search-result.png)
+![Hidden records look like no match, and searchers can leave a note](docs/no-match.png)
+![Shelter check-in with three visibility choices](docs/checkin.png)
+![Staff inbox showing a note and its possible match](docs/inbox.png)
